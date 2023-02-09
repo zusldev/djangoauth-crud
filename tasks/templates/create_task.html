@@ -1,0 +1,29 @@
+{% extends '_base.html' %}
+{% block content %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="container w-50 mt-5 card p-5 rounded-3">
+            <p><span class="text-uppercase text-black-50">Usuario : {{ user }}</span></p>
+            <legend class="mb-2 border-bottom">Crear una nueva tarea</legend>
+
+            <div class="form-floating mt-4 mb-4">
+                <input type="text" class="form-control" id="floatingInput" placeholder="Crear un..."
+                       name="{{ form.title.name }}" required>
+                <label for="floatingInput">Nombre de tarea</label>
+            </div>
+            <div class="form-floating mt-3">
+            <textarea class="form-control" placeholder="Describe la tarea aqui..." id="floatingTextarea2"
+                      style="height: 100px" name="{{ form.description.name }}"></textarea>
+                <label for="floatingTextarea2">Descripcion</label>
+            </div>
+            <div class="form-group form-check mt-5">
+                <input type="checkbox" class="form-check-input" id="important" name="{{ form.important.name }}"
+                       {% if form.important.value %}checked{% endif %}>
+                <label class="form-check-label" for="important">Importante</label>
+            </div>
+            <button type="submit" class="btn btn-primary mt-5">Crear nueva tarea</button>
+        </div>
+    </form>
+
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends '_base.html' %}
+{% block content %}
+    {# Header con bienvenida y username, muestra la hora de entrada con user.date_joined #}
+    <header class="heading-text mt-3 mb-5 text-center">
+        <h1>Bienvenido, <span class="text-uppercase text-black-50">{{ user.username }}</span></h1>
+        <p>Joined: {{ user.date_joined }}</p>
+        <a class="btn btn-primary" href="{% url 'create' %}">Crear nueva tarea</a>
+        <a class="btn btn-success" href="{% url 'completeList' %}">Tareas completadas</a>
+    </header>
+    {# Mensaje de actualización de tarea, la obtenemos desde task_detail en views.py #}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-warning alert-dismissible fade show w-50 text-center d-flex container" role="alert">
+                <strong>Actualizado! </strong>&nbsp;<span class="text-uppercase">{{ user }}</span>&nbsp;{{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+
+    {% endif %}
+
+
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                {# Verificar en que ruta estamos y mostrar Tareas pendientes o Completadas #}
+                {% if request.get_full_path == '/tasks/completelist' %}
+                    <h2 class="heading-text mb-3 text-center fw-normal">Tareas completadas</h2>
+                {% else %}
+                    <h2 class="heading-text mb-3 text-center fw-normal">Tareas pendientes</h2>
+                {% endif %}
+            </div>
+        </div>
+        {# Recorremos con un for nuestra lista de tasks que obtuvimos en views.py tasks  #}
+        {% for task in tasks %}
+            <div class="card mb-5">
+                <div class="card-header d-flex justify-content-between">
+                    <div>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                             stroke="currentColor" class="w-2 h-2" style="width: 25px">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z">
+                            </path>
+                        </svg>
+                        <p class="text-black-50 text-uppercase fw-bold d-inline-flex">{{ task.user }}</p>
+                        <p>
+                            {# Obtenemos el id de la tarea #}
+                            <mark>Tarea #{{ task.id }}</mark>
+                        </p>
+                    </div>
+                    {# Verificamos la ruta para eliminar el boton de editar en la lista de tareas completadas #}
+                    {# y cambiamos la clase a hidden del div que contiene el boton de editar #}
+                    {% if request.get_full_path == '/tasks/' %}
+                        <div class="hidden">
+                            <a class="text-decoration-none" href="{% url 'task_detail' task.id %}">
+                                <svg viewBox="0 0 1024 1024" class="icon" version="1.1"
+                                     xmlns="http://www.w3.org/2000/svg" style="width: 33px">
+                                    <path d="M823.3 938.8H229.4c-71.6 0-129.8-58.2-129.8-129.8V215.1c0-71.6 58.2-129.8 129.8-129.8h297c23.6 0 42.7 19.1 42.7 42.7s-19.1 42.7-42.7 42.7h-297c-24.5 0-44.4 19.9-44.4 44.4V809c0 24.5 19.9 44.4 44.4 44.4h593.9c24.5 0 44.4-19.9 44.4-44.4V512c0-23.6 19.1-42.7 42.7-42.7s42.7 19.1 42.7 42.7v297c0 71.6-58.2 129.8-129.8 129.8z"
+                                          fill="#3688FF"></path>
+                                    <path d="M483 756.5c-1.8 0-3.5-0.1-5.3-0.3l-134.5-16.8c-19.4-2.4-34.6-17.7-37-37l-16.8-134.5c-1.6-13.1 2.9-26.2 12.2-35.5l374.6-374.6c51.1-51.1 134.2-51.1 185.3 0l26.3 26.3c24.8 24.7 38.4 57.6 38.4 92.7 0 35-13.6 67.9-38.4 92.7L513.2 744c-8.1 8.1-19 12.5-30.2 12.5z m-96.3-97.7l80.8 10.1 359.8-359.8c8.6-8.6 13.4-20.1 13.4-32.3 0-12.2-4.8-23.7-13.4-32.3L801 218.2c-17.9-17.8-46.8-17.8-64.6 0L376.6 578l10.1 80.8z"
+                                          fill="#5F6379"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+                {# Nuestro cuerpo de tarea con titulo y descripcion, la obtenemos por el recorrido del for con nuestra variable task #}
+                <div class="card-body">
+                    <h5 class="card-title">{{ task.title }}</h5>
+                    <p class="card-text">{{ task.description }}</p>
+                </div>
+                {# Nuestro footer de tarea con la fecha de creacion, actualizacion y si es importante o no #}
+                <div class="card-footer">
+                    <p>Created: {{ task.created }}</p>
+                    <p>Updated: {{ task.updated }}</p>
+                    <p>Important: {{ task.important }}</p>
+                    <div class="d-inline-flex">
+                        {# Verificamos si una tarea esta completada para mostrar la leyenda de completada #}
+                        {% if task.datecompleted %}
+                            <p>Completed: {{ task.datecompleted }}</p>
+                        {% else %}
+                            {# Si no esta completada mostramos el boton de completar #}
+                            <form action="{% url 'task_complete' task.id %}" method="POST">
+                                {% csrf_token %}
+                                <p>
+                                    <button href="" class="btn btn-success" type="submit">Completar</button>
+                                </p>
+                            </form>
+                        {% endif %}
+                            {# Eliminar una tarea obteniendo el task.id #}
+                        <form class="ms-2" action="{% url 'task_delete' task.id %}" method="POST">
+                            {% csrf_token %}
+                            <p>
+                                <button href="" class="btn btn-danger" type="submit">Eliminar</button>
+                            </p>
+                        </form>
+                    </div>
+
+                </div>
+
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
